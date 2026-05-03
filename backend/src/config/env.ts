@@ -13,9 +13,9 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRES_IN: z.string().min(1),
   JWT_REFRESH_EXPIRES_IN: z.string().min(1),
   BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(10).max(15),
-  CLOUDINARY_CLOUD_NAME: z.string().min(1),
-  CLOUDINARY_API_KEY: z.string().min(1),
-  CLOUDINARY_API_SECRET: z.string().min(1),
+  CLOUDINARY_CLOUD_NAME: z.string().min(1).optional().default(""),
+  CLOUDINARY_API_KEY: z.string().min(1).optional().default(""),
+  CLOUDINARY_API_SECRET: z.string().min(1).optional().default(""),
 });
 
 export const env = envSchema.parse(process.env);
