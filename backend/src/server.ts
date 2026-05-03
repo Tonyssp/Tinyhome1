@@ -2,7 +2,7 @@ import { app } from "./app";
 import { env } from "./config/env";
 import { prisma } from "./config/prisma";
 
-const server = app.listen(env.PORT, () => {
+const server = app.listen(env.PORT, "0.0.0.0", () => {
   console.log(`Backend listening on port ${env.PORT}`);
 });
 
