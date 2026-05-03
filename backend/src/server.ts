@@ -8,10 +8,13 @@ const server = app.listen(env.PORT, "0.0.0.0", () => {
 
 async function shutdown(signal: string) {
   console.log(`Received ${signal}. Closing server...`);
-  server.close(async () => {
-    await prisma.$disconnect();
-    process.exit(0);
+  await new Promise<void>((resolve) => {
+    server.close(async () => {
+      await prisma.$disconnect();
+      resolve();
+    });
   });
+  process.exit(0);
 }
 
 process.on("SIGINT", () => {
