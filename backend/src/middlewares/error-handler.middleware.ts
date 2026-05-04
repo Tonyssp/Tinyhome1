@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
 import { StatusCodes } from "http-status-codes";
@@ -21,6 +22,28 @@ export function errorHandler(
     return res.status(error.statusCode).json({
       message: error.message,
       details: error.details,
+    });
+  }
+
+  if (error instanceof multer.MulterError) {
+    const message =
+      error.code === "LIMIT_FILE_SIZE"
+        ? "Each image must be 10MB or smaller"
+        : error.code === "LIMIT_FILE_COUNT"
+          ? "You can upload up to 10 images"
+          : error.code === "LIMIT_UNEXPECTED_FILE"
+            ? "Please upload images using the files field"
+            : "Image upload failed";
+
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message,
+      details: error.message,
+    });
+  }
+
+  if (error instanceof Error && error.message === "Only image uploads are allowed") {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: error.message,
     });
   }
 

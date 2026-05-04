@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/Input";
 import { fetchAmenities, createListing, uploadListingImages } from "@/services/listings";
 import { updateCurrentUser } from "@/services/user";
 
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_IMAGE_COUNT = 10;
+
 export default function PostPropertyPage() {
   return (
     <RequireAuth>
@@ -113,7 +116,22 @@ function PostPropertyContent() {
       return;
     }
 
-    const nextFiles = Array.from(files).map((file) => ({
+    const incomingFiles = Array.from(files);
+    const invalidType = incomingFiles.find((file) => !file.type.startsWith("image/"));
+
+    if (invalidType) {
+      setErrorMessage("Please upload image files only.");
+      return;
+    }
+
+    const oversizedFile = incomingFiles.find((file) => file.size > MAX_IMAGE_SIZE_BYTES);
+
+    if (oversizedFile) {
+      setErrorMessage(`${oversizedFile.name} is too large. Each image must be 10MB or smaller.`);
+      return;
+    }
+
+    const nextFiles = incomingFiles.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
     }));
@@ -121,12 +139,14 @@ function PostPropertyContent() {
     setSelectedImages((current) => {
       const combined = [...current, ...nextFiles];
 
-      if (combined.length <= 10) {
+      if (combined.length <= MAX_IMAGE_COUNT) {
+        setErrorMessage("");
         return combined;
       }
 
-      combined.slice(10).forEach((image) => URL.revokeObjectURL(image.preview));
-      return combined.slice(0, 10);
+      combined.slice(MAX_IMAGE_COUNT).forEach((image) => URL.revokeObjectURL(image.preview));
+      setErrorMessage(`You can upload up to ${MAX_IMAGE_COUNT} images.`);
+      return combined.slice(0, MAX_IMAGE_COUNT);
     });
   }
 
