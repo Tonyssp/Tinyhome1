@@ -155,8 +155,28 @@ function PostPropertyContent() {
       return;
     }
 
-    if (!form.title || !form.description || !form.city || !form.district || !form.village || !form.address) {
-      setErrorMessage("Please complete all required listing fields.");
+    if (
+      form.title.trim().length < 5 ||
+      form.description.trim().length < 20 ||
+      form.city.trim().length < 2 ||
+      form.district.trim().length < 2 ||
+      form.village.trim().length < 2 ||
+      form.address.trim().length < 5
+    ) {
+      setErrorMessage("Please complete all required listing fields. Title, address, and description need a little more detail.");
+      return;
+    }
+
+    const price = Number(form.price);
+    const deposit = Number(form.deposit);
+
+    if (!Number.isFinite(price) || price <= 0) {
+      setErrorMessage("Please enter a valid monthly price.");
+      return;
+    }
+
+    if (!Number.isFinite(deposit) || deposit < 0) {
+      setErrorMessage("Please enter a valid deposit amount.");
       return;
     }
 
@@ -188,8 +208,8 @@ function PostPropertyContent() {
         {
           title: form.title.trim(),
           description: form.description.trim(),
-          price: Number(form.price),
-          deposit: Number(form.deposit),
+          price,
+          deposit,
           city: form.city.trim(),
           district: form.district.trim(),
           village: form.village.trim(),
@@ -323,26 +343,32 @@ function PostPropertyContent() {
 
           <Card className="p-6 sm:p-8">
             <h2 className="text-2xl font-bold text-ink">Amenities</h2>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {amenities.map((item) => (
-                <label
-                  key={item.id}
-                  className={`flex items-center gap-3 rounded-2xl border p-4 ${
-                    form.amenityIds.includes(item.id)
-                      ? "border-primary bg-blue-50"
-                      : "border-slate-200"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.amenityIds.includes(item.id)}
-                    onChange={() => toggleAmenity(item.id)}
-                    className="h-4 w-4 accent-[#2563EB]"
-                  />
-                  <span className="text-sm font-medium text-slate-700">{item.name}</span>
-                </label>
-              ))}
-            </div>
+            {amenities.length ? (
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {amenities.map((item) => (
+                  <label
+                    key={item.id}
+                    className={`flex items-center gap-3 rounded-2xl border p-4 ${
+                      form.amenityIds.includes(item.id)
+                        ? "border-primary bg-blue-50"
+                        : "border-slate-200"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.amenityIds.includes(item.id)}
+                      onChange={() => toggleAmenity(item.id)}
+                      className="h-4 w-4 accent-[#2563EB]"
+                    />
+                    <span className="text-sm font-medium text-slate-700">{item.name}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-medium text-primary-dark">
+                Amenities are not available yet. Check the backend API connection.
+              </p>
+            )}
           </Card>
 
           <Card className="p-6 sm:p-8">
@@ -412,6 +438,16 @@ function PostPropertyContent() {
                 {submitting ? "Publishing..." : "Publish Listing"}
               </Button>
             </div>
+            {errorMessage ? (
+              <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {errorMessage}
+              </p>
+            ) : null}
+            {successMessage ? (
+              <p className="mt-4 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-semibold text-primary">
+                {successMessage}
+              </p>
+            ) : null}
           </Card>
         </div>
       </div>

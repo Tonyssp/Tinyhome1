@@ -8,6 +8,7 @@ import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../config/prisma";
 import { ApiError } from "../../utils/api-error";
 import { getPagination } from "../../utils/pagination";
+import { defaultAmenities } from "./default-amenities";
 
 type Actor = {
   id: string;
@@ -94,6 +95,15 @@ function ensureListingWriteAccess(actor: Actor, landlordId: string) {
 
 export const listingService = {
   async listAmenities() {
+    const amenityCount = await prisma.amenity.count();
+
+    if (amenityCount === 0) {
+      await prisma.amenity.createMany({
+        data: defaultAmenities,
+        skipDuplicates: true,
+      });
+    }
+
     return prisma.amenity.findMany({
       orderBy: { name: "asc" },
       select: {

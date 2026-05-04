@@ -1,29 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { toSlug } from "../src/utils/slug";
+import { defaultAmenities } from "../src/modules/listing/default-amenities";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const amenities = [
-    "Wi-Fi",
-    "Parking",
-    "Air Conditioning",
-    "Furnished",
-    "Laundry",
-    "Pet Friendly",
-    "Security",
-    "Balcony",
-    "Kitchen",
-    "Water Heater",
-    "Garden",
-    "Pool",
-  ];
-
   await prisma.amenity.createMany({
-    data: amenities.map((name) => ({
-      name,
-      slug: toSlug(name),
-    })),
+    data: defaultAmenities,
     skipDuplicates: true,
   });
 }

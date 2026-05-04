@@ -1,5 +1,7 @@
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:4000/api";
+  configuredApiUrl ?? (process.env.NODE_ENV === "development" ? "http://localhost:4000/api" : "");
 
 export class ApiError extends Error {
   status: number;
@@ -22,6 +24,13 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const { body, headers, token, ...rest } = options;
   const resolvedHeaders = new Headers(headers);
 
+  if (!API_BASE_URL) {
+    throw new ApiError(
+      "Backend API URL is not configured. Add NEXT_PUBLIC_API_URL in Vercel and redeploy the frontend.",
+      0,
+    );
+  }
+
   if (token) {
     resolvedHeaders.set("Authorization", `Bearer ${token}`);
   }
@@ -32,16 +41,26 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     resolvedHeaders.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...rest,
-    headers: resolvedHeaders,
-    body:
-      body && !isFormData && typeof body !== "string"
-        ? JSON.stringify(body)
-        : (body as BodyInit | null | undefined),
-    credentials: "include",
-    cache: "no-store",
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...rest,
+      headers: resolvedHeaders,
+      body:
+        body && !isFormData && typeof body !== "string"
+          ? JSON.stringify(body)
+          : (body as BodyInit | null | undefined),
+      credentials: "include",
+      cache: "no-store",
+    });
+  } catch (error) {
+    throw new ApiError(
+      `Could not connect to backend API at ${API_BASE_URL}. Check NEXT_PUBLIC_API_URL on Vercel and CLIENT_ORIGIN on Railway.`,
+      0,
+      error,
+    );
+  }
 
   const contentType = response.headers.get("content-type") ?? "";
   const payload = contentType.includes("application/json")
