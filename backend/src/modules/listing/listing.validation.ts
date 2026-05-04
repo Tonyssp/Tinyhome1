@@ -2,6 +2,10 @@ import { ListingApprovalStatus, ListingAvailabilityStatus, ListingType } from "@
 import { z } from "zod";
 
 const MAX_MONEY_AMOUNT = 9999999999.99;
+const imageUrlSchema = z.union([
+  z.string().url(),
+  z.string().regex(/^data:image\/(?:png|jpe?g|webp|gif);base64,[a-zA-Z0-9+/=]+$/, "Invalid image data"),
+]);
 
 export const createListingSchema = z.object({
   title: z.string().trim().min(5).max(180),
@@ -24,7 +28,7 @@ export const createListingSchema = z.object({
   images: z
     .array(
       z.object({
-        imageUrl: z.string().url(),
+        imageUrl: imageUrlSchema,
         publicId: z.string().min(1),
         sortOrder: z.number().int().min(0).optional(),
       }),

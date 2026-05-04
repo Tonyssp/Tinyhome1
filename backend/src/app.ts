@@ -29,8 +29,8 @@ app.use(
 );
 app.use(compression());
 app.use(cookieParser());
-app.use(express.json({ limit: "2mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "30mb" }));
+app.use(express.urlencoded({ extended: true, limit: "30mb" }));
 app.use(
   "/uploads",
   express.static(path.join(process.cwd(), "uploads"), {
@@ -39,6 +39,18 @@ app.use(
     },
   }),
 );
+app.get("/uploads/listings/:filename", (_req, res) => {
+  res.setHeader("Content-Type", "image/svg+xml");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  res.send(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+      <rect width="1200" height="800" fill="#eaf3ff"/>
+      <rect x="120" y="120" width="960" height="560" rx="36" fill="#ffffff"/>
+      <text x="600" y="365" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#2563eb">Image unavailable</text>
+      <text x="600" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#64748b">Please re-upload this listing photo</text>
+    </svg>
+  `);
+});
 app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(
   "/api",

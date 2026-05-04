@@ -1,8 +1,6 @@
 import { Role } from "@prisma/client";
 import crypto from "crypto";
-import fs from "fs/promises";
 import { StatusCodes } from "http-status-codes";
-import path from "path";
 import streamifier from "streamifier";
 import { cloudinary } from "../../config/cloudinary";
 import { prisma } from "../../config/prisma";
@@ -33,32 +31,11 @@ function uploadSingleBuffer(file: Express.Multer.File) {
   });
 }
 
-function getFileExtension(file: Express.Multer.File) {
-  const extension = path.extname(file.originalname).toLowerCase();
-
-  if (extension) {
-    return extension;
-  }
-
-  if (file.mimetype === "image/png") return ".png";
-  if (file.mimetype === "image/webp") return ".webp";
-  if (file.mimetype === "image/gif") return ".gif";
-
-  return ".jpg";
-}
-
-async function saveSingleBuffer(file: Express.Multer.File, publicOrigin: string) {
-  const uploadDir = path.join(process.cwd(), "uploads", "listings");
-  await fs.mkdir(uploadDir, { recursive: true });
-
-  const publicId = `local_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
-  const filename = `${publicId}${getFileExtension(file)}`;
-  const fullPath = path.join(uploadDir, filename);
-
-  await fs.writeFile(fullPath, file.buffer);
+function bufferToDataUrl(file: Express.Multer.File) {
+  const publicId = `data_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
 
   return {
-    secure_url: `${publicOrigin}/uploads/listings/${filename}`,
+    secure_url: `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
     public_id: publicId,
   };
 }
@@ -68,7 +45,7 @@ export const uploadService = {
     files: Express.Multer.File[],
     actor: Actor,
     listingId?: string,
-    publicOrigin?: string,
+    _publicOrigin?: string,
   ) {
     if (!files.length) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "At least one file is required");
@@ -94,12 +71,8 @@ export const uploadService = {
     try {
       uploaded = await Promise.all(files.map((file) => uploadSingleBuffer(file)));
     } catch (error) {
-      if (!publicOrigin) {
-        throw error;
-      }
-
-      console.error("Cloudinary upload failed. Falling back to local uploads.", error);
-      uploaded = await Promise.all(files.map((file) => saveSingleBuffer(file, publicOrigin)));
+      console.error("Cloudinary upload failed. Falling back to database-backed image data.", error);
+      uploaded = files.map((file) => bufferToDataUrl(file));
     }
 
     if (listingId) {
