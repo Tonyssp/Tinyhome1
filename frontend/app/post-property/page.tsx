@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -90,8 +90,6 @@ function PostPropertyContent() {
     };
   }, []);
 
-  const isLandlordBlocked = useMemo(() => user?.role === "USER", [user?.role]);
-
   function updateField(field: keyof typeof form, value: string | string[]) {
     setForm((current) => ({
       ...current,
@@ -147,11 +145,6 @@ function PostPropertyContent() {
   async function handleSubmit() {
     if (!accessToken) {
       setErrorMessage("Your session has expired. Please sign in again.");
-      return;
-    }
-
-    if (isLandlordBlocked) {
-      setErrorMessage("Landlord account required");
       return;
     }
 
@@ -245,19 +238,6 @@ function PostPropertyContent() {
     } finally {
       setSubmitting(false);
     }
-  }
-
-  if (isLandlordBlocked) {
-    return (
-      <div className="page-shell py-10">
-        <Card className="p-8 text-center">
-          <h1 className="text-2xl font-bold text-ink">Landlord account required</h1>
-          <p className="mt-3 text-sm leading-7 text-slate-500">
-            Your current account can browse listings, but only landlord accounts can post property.
-          </p>
-        </Card>
-      </div>
-    );
   }
 
   return (

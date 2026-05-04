@@ -115,10 +115,6 @@ export const listingService = {
   },
 
   async createListing(actor: Actor, payload: CreateListingInput) {
-    if (actor.role !== Role.LANDLORD && actor.role !== Role.ADMIN) {
-      throw new ApiError(StatusCodes.FORBIDDEN, "Only landlords or admins can create listings");
-    }
-
     await assertAmenitiesExist(payload.amenityIds);
 
     const listing = await prisma.listing.create({

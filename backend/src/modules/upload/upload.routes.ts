@@ -28,7 +28,7 @@ const router = Router();
 router.post(
   "/",
   authenticate,
-  authorize(Role.LANDLORD, Role.ADMIN),
+  authorize(Role.USER, Role.LANDLORD, Role.ADMIN),
   upload.array("files", 10),
   validate(uploadBodySchema),
   asyncHandler(uploadController.upload),
