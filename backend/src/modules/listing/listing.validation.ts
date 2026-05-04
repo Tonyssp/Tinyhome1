@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const createListingSchema = z.object({
   title: z.string().trim().min(5).max(180),
-  description: z.string().trim().min(20).max(5000),
+  description: z.string().trim().min(5).max(5000),
   price: z.coerce.number().positive(),
   deposit: z.coerce.number().min(0),
   city: z.string().trim().min(2).max(120),

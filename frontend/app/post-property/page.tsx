@@ -155,15 +155,27 @@ function PostPropertyContent() {
       return;
     }
 
+    if (form.title.trim().length < 5) {
+      setErrorMessage("Please enter a title with at least 5 characters.");
+      return;
+    }
+
+    if (form.description.trim().length < 5) {
+      setErrorMessage("Please enter a description with at least 5 characters.");
+      return;
+    }
+
     if (
-      form.title.trim().length < 5 ||
-      form.description.trim().length < 20 ||
       form.city.trim().length < 2 ||
       form.district.trim().length < 2 ||
-      form.village.trim().length < 2 ||
-      form.address.trim().length < 5
+      form.village.trim().length < 2
     ) {
-      setErrorMessage("Please complete all required listing fields. Title, address, and description need a little more detail.");
+      setErrorMessage("Please complete city, district, and village.");
+      return;
+    }
+
+    if (form.address.trim().length < 5) {
+      setErrorMessage("Please enter an address with at least 5 characters.");
       return;
     }
 
