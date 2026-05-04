@@ -4,6 +4,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import path from "path";
 import rateLimit from "express-rate-limit";
 import { env } from "./config/env";
 import { adminRouter } from "./modules/admin/admin.routes";
@@ -30,6 +31,7 @@ app.use(compression());
 app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(
   "/api",

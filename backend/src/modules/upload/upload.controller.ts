@@ -5,7 +5,9 @@ import { uploadService } from "./upload.service";
 export const uploadController = {
   async upload(req: Request, res: Response) {
     const files = (req.files as Express.Multer.File[]) ?? [];
-    const uploads = await uploadService.uploadImages(files, req.user!, req.body.listingId);
+    const forwardedProto = req.get("x-forwarded-proto")?.split(",")[0]?.trim();
+    const publicOrigin = `${forwardedProto || req.protocol}://${req.get("host")}`;
+    const uploads = await uploadService.uploadImages(files, req.user!, req.body.listingId, publicOrigin);
 
     return res.status(StatusCodes.CREATED).json({
       message: "Files uploaded successfully",
