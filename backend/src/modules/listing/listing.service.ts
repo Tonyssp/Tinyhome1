@@ -133,8 +133,8 @@ export const listingService = {
         address: payload.address,
         type: payload.type,
         availabilityStatus: payload.availabilityStatus ?? ListingAvailabilityStatus.AVAILABLE,
-        approvalStatus: actor.role === Role.ADMIN ? ListingApprovalStatus.APPROVED : ListingApprovalStatus.PENDING,
-        approvedAt: actor.role === Role.ADMIN ? new Date() : null,
+        approvalStatus: ListingApprovalStatus.APPROVED,
+        approvedAt: new Date(),
         approvedById: actor.role === Role.ADMIN ? actor.id : null,
         landlordId: actor.id,
         amenities: {
