@@ -12,6 +12,7 @@ import { updateCurrentUser } from "@/services/user";
 
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGE_COUNT = 10;
+const MAX_MONEY_AMOUNT = 9999999999.99;
 
 export default function PostPropertyPage() {
   return (
@@ -200,8 +201,18 @@ function PostPropertyContent() {
       return;
     }
 
+    if (price > MAX_MONEY_AMOUNT) {
+      setErrorMessage("Monthly price is too large.");
+      return;
+    }
+
     if (!Number.isFinite(deposit) || deposit < 0) {
       setErrorMessage("Please enter a valid deposit amount.");
+      return;
+    }
+
+    if (deposit > MAX_MONEY_AMOUNT) {
+      setErrorMessage("Deposit is too large.");
       return;
     }
 

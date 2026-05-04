@@ -68,13 +68,33 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     : await response.text();
 
   if (!response.ok) {
-    const message =
+    let message =
       typeof payload === "object" &&
       payload !== null &&
       "message" in payload &&
       typeof payload.message === "string"
         ? payload.message
         : "Request failed";
+
+    if (
+      message === "Validation failed" &&
+      typeof payload === "object" &&
+      payload !== null &&
+      "errors" in payload &&
+      typeof payload.errors === "object" &&
+      payload.errors !== null &&
+      "fieldErrors" in payload.errors &&
+      typeof payload.errors.fieldErrors === "object" &&
+      payload.errors.fieldErrors !== null
+    ) {
+      const firstFieldError = Object.values(payload.errors.fieldErrors)
+        .flat()
+        .find((error): error is string => typeof error === "string");
+
+      if (firstFieldError) {
+        message = firstFieldError;
+      }
+    }
 
     throw new ApiError(message, response.status, payload);
   }

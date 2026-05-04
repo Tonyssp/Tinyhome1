@@ -1,11 +1,19 @@
 import { ListingApprovalStatus, ListingAvailabilityStatus, ListingType } from "@prisma/client";
 import { z } from "zod";
 
+const MAX_MONEY_AMOUNT = 9999999999.99;
+
 export const createListingSchema = z.object({
   title: z.string().trim().min(5).max(180),
   description: z.string().trim().min(5).max(5000),
-  price: z.coerce.number().positive(),
-  deposit: z.coerce.number().min(0),
+  price: z.coerce
+    .number()
+    .positive()
+    .max(MAX_MONEY_AMOUNT, "Monthly price is too large"),
+  deposit: z.coerce
+    .number()
+    .min(0)
+    .max(MAX_MONEY_AMOUNT, "Deposit is too large"),
   city: z.string().trim().min(2).max(120),
   district: z.string().trim().min(2).max(120),
   village: z.string().trim().min(2).max(120),

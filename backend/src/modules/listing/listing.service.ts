@@ -149,6 +149,14 @@ export const listingService = {
       include: {
         images: true,
         amenities: { include: { amenity: true } },
+        landlord: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          },
+        },
       },
     });
 
@@ -331,6 +339,14 @@ export const listingService = {
         include: {
           images: true,
           amenities: { include: { amenity: true } },
+          landlord: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              phone: true,
+            },
+          },
         },
       });
     });
